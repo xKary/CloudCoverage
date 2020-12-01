@@ -36,7 +36,7 @@ public class KMeans<T extends Meanable<T>> {
         }
     }
 
-    public LinkedList<Cluster<T>> getClusters(LinkedList<T> initVals, Distance<T> measure) {
+    public LinkedList<LinkedList<T>> getClusters(LinkedList<T> initVals, Distance<T> measure) {
         LinkedList<Cluster<T>> prevs;
         LinkedList<Cluster<T>> new_clusters;
 
@@ -61,7 +61,11 @@ public class KMeans<T extends Meanable<T>> {
             n += 1;
         } while(!means_r_same && n <= 500);
 
-        return prevs;
+        LinkedList<LinkedList<T>> res = new LinkedList<LinkedList<T>>();
+        for (Cluster<T> cluster: prevs) {
+            res.push(cluster.getElements());
+        }
+        return res;
     }
 
 

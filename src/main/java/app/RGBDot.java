@@ -1,4 +1,7 @@
-package k_means;
+package app;
+
+import k_means.Meanable;
+
 import java.io.File;
 import java.io.IOException;
 import java.awt.image.BufferedImage;

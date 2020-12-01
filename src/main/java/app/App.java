@@ -21,7 +21,7 @@ public class App {
 
         if(args.length > 1){
             if(args[1].toLowerCase() == "s")
-                generateImg = true;
+            generateImg = true;
         }
 
         try {
@@ -41,7 +41,7 @@ public class App {
             for(int j = 0; j < img_height; j++) {
                 double d = Math.sqrt(Math.pow(2184 - i,2) + Math.pow(1456 - j,2));
                 if(d <= 1324)
-                    puntos.add(new RGBDot(i,j, img.getRGB(i, j)));
+                puntos.add(new RGBDot(i,j, img.getRGB(i, j)));
             }
         }
 
@@ -53,41 +53,47 @@ public class App {
         init.add(new RGBDot(0,0, 50, 50, 150));
 
         KMeans<RGBDot> clusterer = new KMeans<RGBDot>(puntos);
-        LinkedList<Cluster<RGBDot>> clustered = clusterer.getClusters(init, (RGBDot a,  RGBDot b) -> {
-            // float difR = a.get_r() - b.get_r();
-            // float difG = a.get_g() - b.get_g();
-            // float difB = a.get_b() - b.get_b();
-            //
-            // float squareR = difR * difR;
-            // float squareG = difG * difG;
-            // float squareB = difB * difB;
-            // return (float) Math.sqrt(squareR + squareG + squareB);
+        LinkedList<LinkedList<RGBDot>> clustered = clusterer.getClusters(init, (RGBDot a,  RGBDot b) -> {
             return (float) Math.abs(a.get_r() - b.get_r());
         });
 
         System.out.println("Llegué aqui");
 
-        BufferedImage clustered_img = new BufferedImage(img_width, img_height,  BufferedImage.TYPE_INT_RGB);
-        System.out.println(clustered.get(0).getElements().size());
-        System.out.println(clustered.get(1).getElements().size());
+        float icc = calculateIcc(clustered);
+        System.out.println("Índice de cobertura nubosa: " + icc);
 
-        for (RGBDot dot: clustered.get(0).getElements()) {
+        //write image
+        if(generateImg) {
+            BufferedImage clustered_img = generateClusteredImg(clustered, img_width, img_height);
+            try {
+                File nuevoF = new File(outputName);
+                ImageIO.write(clustered_img, "jpg", nuevoF);
+                System.out.println("Ya kdo tu imagen");
+            }
+            catch(IOException e) {
+                System.out.println(e);
+            }
+        }
+    }
+
+    public static float calculateIcc(LinkedList<LinkedList<RGBDot>> pixeles) {
+        int cloud_n = pixeles.get(0).size();
+        int sky_n = pixeles.get(1).size();
+        float icc = (float) cloud_n/(cloud_n + sky_n);
+        return icc;
+    }
+
+    public static BufferedImage generateClusteredImg(LinkedList<LinkedList<RGBDot>> clustered, int width, int height) {
+        BufferedImage clustered_img = new BufferedImage(width, height,  BufferedImage.TYPE_INT_RGB);
+
+        for (RGBDot dot: clustered.get(0)) {
             clustered_img.setRGB(dot.get_x(), dot.get_y(), RGBDot.to_rgb(255,255,255));
         }
 
-        for (RGBDot dot: clustered.get(1).getElements()) {
+        for (RGBDot dot: clustered.get(1)) {
             clustered_img.setRGB(dot.get_x(), dot.get_y(), RGBDot.to_rgb(128,128,128));
         }
 
-        //write image
-        if(generateImg)
-          try {
-              File nuevoF = new File(outputName);
-              ImageIO.write(clustered_img, "jpg", nuevoF);
-              System.out.println("Ya kdo tu imagen");
-          }
-          catch(IOException e) {
-              System.out.println(e);
-          }
+        return clustered_img;
     }
 }
