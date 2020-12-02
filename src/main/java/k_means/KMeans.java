@@ -52,18 +52,18 @@ public class KMeans<T extends Meanable<T>> {
 
             new_clusters = new LinkedList<Cluster<T>>();
             for(Cluster cl: clusters) {
-                new_clusters.push(new Cluster(cl.mean()));
+                new_clusters.add(new Cluster(cl.mean()));
             }
             prevs = clusters;
             clusters = new_clusters;
 
             means_r_same = compare_means(clusters, prevs);
             n += 1;
-        } while(!means_r_same && n <= 500);
+        } while(!means_r_same && n <= 25);
 
         LinkedList<LinkedList<T>> res = new LinkedList<LinkedList<T>>();
         for (Cluster<T> cluster: prevs) {
-            res.push(cluster.getElements());
+            res.add(cluster.getElements());
         }
         return res;
     }

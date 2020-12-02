@@ -26,7 +26,7 @@ public class App {
             System.out.println("Ingresa los parámetros solicitados");
             return;
         }
-
+        
         try {
             File f = new File(inputName);
             img = ImageIO.read(f);
@@ -53,8 +53,11 @@ public class App {
 
         LinkedList<RGBDot> init = new LinkedList<RGBDot>();
 
-        init.add(new RGBDot(0,0, 255,255,255));
-        init.add(new RGBDot(0,0, 50, 50, 150));
+        // init.add(new RGBDot(0,0, 255,255,255));
+        // init.add(new RGBDot(0,0, 0, 50, 150));
+
+        init.add(new RGBDot(0,0, 0, 0 , 255));
+        init.add(new RGBDot(0,0, 255, 0, 0));
 
         KMeans<RGBDot> clusterer = new KMeans<RGBDot>(puntos);
         LinkedList<LinkedList<RGBDot>> clustered = clusterer.getClusters(init, (RGBDot a,  RGBDot b) -> {
