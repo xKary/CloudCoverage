@@ -8,7 +8,11 @@ import javax.imageio.ImageIO;
 import java.util.LinkedList;
 
 import k_means.*;
-
+/**
+ * Clase qué se encarga de determinar el Índice de Cobertura Nubosa de una
+ * imagen del cielo, y generar su versión en blanco y negro si se lo
+ * solicitan.
+ */
 public class App {
 
     public static String folder = "src/main/resources/";
@@ -26,7 +30,7 @@ public class App {
             System.out.println("Ingresa los parámetros solicitados");
             return;
         }
-        
+
         try {
             File f = new File(inputName);
             img = ImageIO.read(f);
@@ -113,7 +117,7 @@ public class App {
     }
 
     /**
-     * Método que genera la ima
+     * Método que genera la imagen a blanco y negro, de la imagen original.
      * @param clustered
      * @param width Ancho de la imagen.
      * @param height Alto de la imagen.
