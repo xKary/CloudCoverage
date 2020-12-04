@@ -8,6 +8,7 @@ import java.awt.Color;
 import javax.imageio.ImageIO;
 
 import java.util.LinkedList;
+import java.util.function.Predicate;
 
 /**
  * Clase qué se encarga de determinar el Índice de Cobertura Nubosa de una
@@ -53,13 +54,20 @@ public class App {
                     puntos.add(new RGBDot(i,j, img.getRGB(i, j)));
             }
         }
+        Predicate<RGBDot> separaSol = dot -> dot.get_r() + dot.get_b() + dot.get_g() == 255 *3;
+        Predicate<RGBDot> separaNubes = dot -> (float) dot.get_r()/dot.get_b() < 0.95;
         LinkedList<RGBDot> cielo = new LinkedList<RGBDot>();
+        LinkedList<RGBDot> cieloNube = new LinkedList<RGBDot>();
+        LinkedList<RGBDot> nubes = new LinkedList<RGBDot>();
         LinkedList<RGBDot> sol = new LinkedList<RGBDot>();
-        filterSun(puntos, cielo, sol);
+
+        separateRGBDot(puntos, sol, cieloNube, separaSol);
+        separateRGBDot(cieloNube, cielo, nubes, separaNubes);
+        cielo.addAll(sol);
 
         LinkedList<LinkedList<RGBDot>> clustered = new LinkedList<LinkedList<RGBDot>>();
         clustered.add(cielo);
-        clustered.add(sol);
+        clustered.add(nubes);
 
         float icc = calculateIcc(clustered);
         System.out.println("Índice de cobertura nubosa: " + icc);
@@ -128,12 +136,12 @@ public class App {
         return clustered_img;
     }
 
-    public static void filterSun(LinkedList<RGBDot> dots, LinkedList<RGBDot> sky, LinkedList<RGBDot> sun) {
+    public static void separateRGBDot(LinkedList<RGBDot> dots, LinkedList<RGBDot> trueL, LinkedList<RGBDot> falseL, Predicate<RGBDot> predicado) {
         for (RGBDot dot: dots) {
-            if ((float) dot.get_r()/dot.get_b() < 0.95) {
-                sky.add(dot);
+            if (predicado.test(dot)) {
+                trueL.add(dot);
             } else {
-                sun.add(dot);
+                falseL.add(dot);
             }
         }
     }
