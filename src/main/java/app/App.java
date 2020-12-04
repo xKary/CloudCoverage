@@ -65,12 +65,12 @@ public class App {
 
         KMeans<RGBDot> clusterer = new KMeans<RGBDot>(cielo);
         LinkedList<LinkedList<RGBDot>> clustered = clusterer.getClusters(init, (RGBDot a,  RGBDot b) -> {
-            return (float) Math.abs(a.get_r() - b.get_r());
+            return (float) Math.abs(a.get_r() - b.get_r()*.95);
         });
 
-        for (RGBDot dot: sol) {
-            clustered.get(0).add(dot);
-        }
+        // for (RGBDot dot: sol) {
+        //     clustered.get(0).add(dot);
+        // }
 
         float icc = calculateIcc(clustered);
         System.out.println("Índice de cobertura nubosa: " + icc);
@@ -93,7 +93,7 @@ public class App {
      */
     public static void checkParameters(String[] args){
         inputName += args[0];
-        int indexDot = args[0].indexOf(".") - 1;
+        int indexDot = args[0].indexOf(".");
         outputName += args[0].substring(0, indexDot) + "-seg.jpg";
 
         if(args.length > 1){
@@ -141,10 +141,7 @@ public class App {
 
     public static void filterSun(LinkedList<RGBDot> dots, LinkedList<RGBDot> sky, LinkedList<RGBDot> sun) {
         for (RGBDot dot: dots) {
-            if (dot.get_r() == 255 &&
-                dot.get_g() == 255 &&
-                dot.get_b() == 255) {
-
+            if ((float) dot.get_r()/dot.get_b() < 0.95) {
                 sun.add(dot);
             } else {
                 sky.add(dot);
