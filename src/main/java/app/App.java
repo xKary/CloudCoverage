@@ -53,12 +53,7 @@ public class App {
             }
         }
 
-        System.out.println("Aqui estoy");
-
         LinkedList<RGBDot> init = new LinkedList<RGBDot>();
-
-        // init.add(new RGBDot(0,0, 255,255,255));
-        // init.add(new RGBDot(0,0, 0, 50, 150));
 
         init.add(new RGBDot(0,0, 0, 0 , 255));
         init.add(new RGBDot(0,0, 255, 0, 0));
@@ -68,18 +63,14 @@ public class App {
             return (float) Math.abs(a.get_r() - b.get_r());
         });
 
-        System.out.println("Llegué aqui");
-
         float icc = calculateIcc(clustered);
         System.out.println("Índice de cobertura nubosa: " + icc);
 
-        //write image
         if(generateImg) {
             BufferedImage clustered_img = generateClusteredImg(clustered, img_width, img_height);
             try {
                 File nuevoF = new File(outputName);
                 ImageIO.write(clustered_img, "jpg", nuevoF);
-                System.out.println("Ya kdo tu imagen");
             }
             catch(IOException e) {
                 System.out.println(e);
@@ -93,15 +84,14 @@ public class App {
      */
     public static void checkParameters(String[] args){
         inputName += args[0];
-        outputName += inputName + "-seg.jpg";
+        int indexDot = args[0].indexOf(".") - 1;
+        outputName += args[0].substring(0, indexDot) + "-seg.jpg";
 
-        char flag = args[1].charAt(0);
-
-        if(args.length > 1)
+        if(args.length > 1){
+            char flag = args[1].charAt(0);
             if(flag == 's' || flag == 'S')
                 generateImg = true;
-        System.out.println(generateImg);
-
+        }
     }
 
     /**

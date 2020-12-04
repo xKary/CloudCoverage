@@ -1,5 +1,4 @@
 package app;
-
 import k_means.Meanable;
 
 import java.io.File;
@@ -155,9 +154,6 @@ public class RGBDot implements Meanable<RGBDot> {
             total_b += dot.get_b();
             n += 1;
         }
-        // if (n == 0) {
-        //     return null;
-        // }
 
         int color = to_rgb(total_r/n, total_g/n, total_b/n);
         return new RGBDot(0,0, color);
