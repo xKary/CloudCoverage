@@ -3,6 +3,8 @@ package app;
 import java.io.File;
 import java.io.IOException;
 import java.awt.image.BufferedImage;
+import java.awt.Graphics2D;
+import java.awt.Color;
 import javax.imageio.ImageIO;
 
 import java.util.LinkedList;
@@ -52,16 +54,23 @@ public class App {
                     puntos.add(new RGBDot(i,j, img.getRGB(i, j)));
             }
         }
+        LinkedList<RGBDot> cielo = new LinkedList<RGBDot>();
+        LinkedList<RGBDot> sol = new LinkedList<RGBDot>();
+        filterSun(puntos, cielo, sol);
 
         LinkedList<RGBDot> init = new LinkedList<RGBDot>();
 
         init.add(new RGBDot(0,0, 0, 0 , 255));
         init.add(new RGBDot(0,0, 255, 0, 0));
 
-        KMeans<RGBDot> clusterer = new KMeans<RGBDot>(puntos);
+        KMeans<RGBDot> clusterer = new KMeans<RGBDot>(cielo);
         LinkedList<LinkedList<RGBDot>> clustered = clusterer.getClusters(init, (RGBDot a,  RGBDot b) -> {
             return (float) Math.abs(a.get_r() - b.get_r());
         });
+
+        for (RGBDot dot: sol) {
+            clustered.get(0).add(dot);
+        }
 
         float icc = calculateIcc(clustered);
         System.out.println("Índice de cobertura nubosa: " + icc);
@@ -115,15 +124,31 @@ public class App {
      */
     public static BufferedImage generateClusteredImg(LinkedList<LinkedList<RGBDot>> clustered, int width, int height) {
         BufferedImage clustered_img = new BufferedImage(width, height,  BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = clustered_img.createGraphics();
+        graphics.setPaint ( new Color(128, 128, 128) );
+        graphics.fillRect ( 0, 0, clustered_img.getWidth(), clustered_img.getHeight() );
 
         for (RGBDot dot: clustered.get(0)) {
-            clustered_img.setRGB(dot.get_x(), dot.get_y(), RGBDot.to_rgb(255,255,255));
+            clustered_img.setRGB(dot.get_x(), dot.get_y(), RGBDot.to_rgb(0,0,0));
         }
 
         for (RGBDot dot: clustered.get(1)) {
-            clustered_img.setRGB(dot.get_x(), dot.get_y(), RGBDot.to_rgb(128,128,128));
+            clustered_img.setRGB(dot.get_x(), dot.get_y(), RGBDot.to_rgb(255,255,255));
         }
 
         return clustered_img;
+    }
+
+    public static void filterSun(LinkedList<RGBDot> dots, LinkedList<RGBDot> sky, LinkedList<RGBDot> sun) {
+        for (RGBDot dot: dots) {
+            if (dot.get_r() == 255 &&
+                dot.get_g() == 255 &&
+                dot.get_b() == 255) {
+
+                sun.add(dot);
+            } else {
+                sky.add(dot);
+            }
+        }
     }
 }
