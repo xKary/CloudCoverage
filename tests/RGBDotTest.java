@@ -1,7 +1,11 @@
+import java.util.LinkedList;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import app.RGBDot;
-
+/**
+ * Clase que se encarga de verificar el correcto funcionamiento de la clase
+ * RGBDot.
+ */
 public class RGBDotTest{
 
     @Test
@@ -34,9 +38,22 @@ public class RGBDotTest{
     }
 
     @Test
+    public void testMean() {
+        LinkedList<RGBDot> list = new LinkedList<RGBDot>();
+        RGBDot dot = new RGBDot(10,20,0,100,90);
+        list.add(dot);
+        list.add(new RGBDot(105,15,125,150,190));
+        list.add(new RGBDot(100,200,231,200,140));
+        RGBDot meanAns = dot.mean(list);
+        assertEquals(118,meanAns.get_r());
+        assertEquals(150,meanAns.get_g());
+        assertEquals(140,meanAns.get_b());
+    }
+
+    @Test
     public void testEquals() {
         RGBDot dot = new RGBDot(10,20,0,100,90);
-        RGBDot dot1 = new RGBDot(10,20,100,90,0);
+        RGBDot dot1 = new RGBDot(151,222,100,90,0);
         assertEquals(false,dot.equals(dot1));
     }
 }

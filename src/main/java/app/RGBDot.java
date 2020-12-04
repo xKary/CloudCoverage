@@ -141,7 +141,13 @@ public class RGBDot implements Meanable<RGBDot> {
         return r == dot.r && g == dot.g && b == dot.b;
     }
 
-    @Override
+    /**
+     * Método que calcula el promedio de una lista de puntos.
+     * @param iterable Objeto contiene los puntos con los que se
+     *                 calculará el promedio
+     * @return RGBDot Objeto RGBDot con el color promedio.
+     */
+     @Override
     public RGBDot mean(Iterable<RGBDot> iterable) {
         int total_r = 0;
         int total_g = 0;
