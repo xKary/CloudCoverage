@@ -1,5 +1,4 @@
 package app;
-import k_means.Meanable;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,7 +8,7 @@ import javax.imageio.ImageIO;
 /**
  * Clase que modela un punto con atributos RGB y coordenadas x,y.
  */
-public class RGBDot implements Meanable<RGBDot> {
+public class RGBDot {
     int x;
     int y;
 
@@ -141,27 +140,27 @@ public class RGBDot implements Meanable<RGBDot> {
         return r == dot.r && g == dot.g && b == dot.b;
     }
 
-    /**
-     * Método que calcula el promedio de una lista de puntos.
-     * @param iterable Objeto contiene los puntos con los que se
-     *                 calculará el promedio
-     * @return RGBDot Objeto RGBDot con el color promedio.
-     */
-     @Override
-    public RGBDot mean(Iterable<RGBDot> iterable) {
-        int total_r = 0;
-        int total_g = 0;
-        int total_b = 0;
-        int n = 0;
-
-        for(RGBDot dot: iterable) {
-            total_r += dot.get_r();
-            total_g += dot.get_g();
-            total_b += dot.get_b();
-            n += 1;
-        }
-
-        int color = to_rgb(total_r/n, total_g/n, total_b/n);
-        return new RGBDot(0,0, color);
-    }
+    // /**
+    //  * Método que calcula el promedio de una lista de puntos.
+    //  * @param iterable Objeto contiene los puntos con los que se
+    //  *                 calculará el promedio
+    //  * @return RGBDot Objeto RGBDot con el color promedio.
+    //  */
+    //  @Override
+    // public RGBDot mean(Iterable<RGBDot> iterable) {
+    //     int total_r = 0;
+    //     int total_g = 0;
+    //     int total_b = 0;
+    //     int n = 0;
+    //
+    //     for(RGBDot dot: iterable) {
+    //         total_r += dot.get_r();
+    //         total_g += dot.get_g();
+    //         total_b += dot.get_b();
+    //         n += 1;
+    //     }
+    //
+    //     int color = to_rgb(total_r/n, total_g/n, total_b/n);
+    //     return new RGBDot(0,0, color);
+    // }
 }

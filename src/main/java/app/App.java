@@ -9,7 +9,6 @@ import javax.imageio.ImageIO;
 
 import java.util.LinkedList;
 
-import k_means.*;
 /**
  * Clase qué se encarga de determinar el Índice de Cobertura Nubosa de una
  * imagen del cielo, y generar su versión en blanco y negro si se lo
@@ -58,19 +57,9 @@ public class App {
         LinkedList<RGBDot> sol = new LinkedList<RGBDot>();
         filterSun(puntos, cielo, sol);
 
-        LinkedList<RGBDot> init = new LinkedList<RGBDot>();
-
-        init.add(new RGBDot(0,0, 0, 0 , 255));
-        init.add(new RGBDot(0,0, 255, 0, 0));
-
-        KMeans<RGBDot> clusterer = new KMeans<RGBDot>(cielo);
-        LinkedList<LinkedList<RGBDot>> clustered = clusterer.getClusters(init, (RGBDot a,  RGBDot b) -> {
-            return (float) Math.abs(a.get_r() - b.get_r()*.95);
-        });
-
-        // for (RGBDot dot: sol) {
-        //     clustered.get(0).add(dot);
-        // }
+        LinkedList<LinkedList<RGBDot>> clustered = new LinkedList<LinkedList<RGBDot>>();
+        clustered.add(cielo);
+        clustered.add(sol);
 
         float icc = calculateIcc(clustered);
         System.out.println("Índice de cobertura nubosa: " + icc);
@@ -109,8 +98,8 @@ public class App {
      * @return float  Índice de cobertura nubosa.
      */
     public static float calculateIcc(LinkedList<LinkedList<RGBDot>> pixeles) {
-        int cloud_n = pixeles.get(0).size();
-        int sky_n = pixeles.get(1).size();
+        int sky_n = pixeles.get(0).size();
+        int cloud_n = pixeles.get(1).size();
         float icc = (float) cloud_n/(cloud_n + sky_n);
         return icc;
     }
@@ -142,9 +131,9 @@ public class App {
     public static void filterSun(LinkedList<RGBDot> dots, LinkedList<RGBDot> sky, LinkedList<RGBDot> sun) {
         for (RGBDot dot: dots) {
             if ((float) dot.get_r()/dot.get_b() < 0.95) {
-                sun.add(dot);
-            } else {
                 sky.add(dot);
+            } else {
+                sun.add(dot);
             }
         }
     }
