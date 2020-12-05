@@ -68,9 +68,9 @@ public class App {
             return (float) Math.abs(a.get_r() - b.get_r()*.95);
         });
 
-        // for (RGBDot dot: sol) {
-        //     clustered.get(0).add(dot);
-        // }
+        for (RGBDot dot: sol) {
+            clustered.get(0).add(dot);
+        }
 
         float icc = calculateIcc(clustered);
         System.out.println("Índice de cobertura nubosa: " + icc);
