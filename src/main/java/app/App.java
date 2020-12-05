@@ -48,18 +48,8 @@ public class App {
         int img_width = img.getWidth();
         int img_height = img.getHeight();
 
-        int blanco = 0xfff;
-        LinkedList<RGBDot> pixels = new LinkedList<RGBDot>();
-        for(int i = 0; i < mask.getWidth(); i++) {
-            for(int j = 0; j < mask.getHeight(); j++) {
-                int color = mask.getRGB(i, j);
-                if ((blanco & color) != 0) {
-                    int x = i + 834;
-                    int y = j + 106;
-                    pixels.add(new RGBDot(x,y, img.getRGB(x, y)));
-                }
-            }
-        }
+        LinkedList<RGBDot> pixels = readPixels(mask,img);
+
         Predicate<RGBDot> separaSol = dot -> dot.get_r() + dot.get_b() + dot.get_g() == 255 *3;
         Predicate<RGBDot> separaNubes = dot -> (float) dot.get_r()/dot.get_b() < 0.95;
         LinkedList<RGBDot> cielo = new LinkedList<RGBDot>();
@@ -90,9 +80,35 @@ public class App {
         }
     }
 
+    /**
+     * Método que lee la imagen del archivo.
+     * @param name nombre del archivo
+     * @return BufferedImage Imageb leida.
+     */
     public static BufferedImage readImage(String name) throws IOException {
         File f = new File(name);
         return ImageIO.read(f);
+    }
+    /**
+     * Método que obtiene los pixeles de la imagen que están dentro de la máscara.
+     * @param mask Imagén que se usa cómo máscara.
+     * @param img Imagén de la cual se obtendrán los pixeles.
+     * @return LinkedList<RGBDot> Lista con los punto de la imagen que están dentro de la máscara.
+     */
+    public static LinkedList<RGBDot> readPixels(BufferedImage mask, BufferedImage img){
+        int blanco = 0xfff;
+        LinkedList<RGBDot> pixels = new LinkedList<RGBDot>();
+        for(int i = 0; i < mask.getWidth(); i++) {
+            for(int j = 0; j < mask.getHeight(); j++) {
+                int color = mask.getRGB(i, j);
+                if ((blanco & color) != 0) {
+                    int x = i + 834;
+                    int y = j + 106;
+                    pixels.add(new RGBDot(x,y, img.getRGB(x, y)));
+                }
+            }
+        }
+        return pixels;
     }
 
     /**
