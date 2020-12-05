@@ -31,7 +31,7 @@
         $ java -cp build/ app.App 11833.jpg S
         $ java -cp build/ app.App 11833.jpg s
     ```  
- - El programa iniciará su ejecución y al finanlizar le indicará el índice de cobertura nubosa de la imagen y en caso de que haya generado la imagen en blanco y negro, esta se guardará en el la carpeta src/main/resources con el nombre de la imagen original con el sufijo "-seg" antes de la extensión.
+ - El programa iniciará su ejecución y al finanlizar le indicará el índice de cobertura nubosa de la imagen. En caso de que haya generado la imagen en blanco y negro, ésta se guardará en el la carpeta src/main/resources con el nombre de la imagen original con el sufijo "-seg" antes de la extensión.
 ### Tests
 El programa cuenta con tests para la clase RGBDot, para correrlo seguir los siguientes pasos:
 Dentro de la carpeta CloudCoverage.
