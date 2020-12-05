@@ -45,28 +45,18 @@ public class App {
             return;
         }
 
-        int img_width = img.getWidth();
-        int img_height = img.getHeight();
-
         LinkedList<RGBDot> pixels = readPixels(mask,img);
-
-        Predicate<RGBDot> separaSol = dot -> dot.get_r() + dot.get_b() + dot.get_g() == 255 *3;
-        Predicate<RGBDot> separaNubes = dot -> (float) dot.get_r()/dot.get_b() < 0.95;
-        LinkedList<RGBDot> cielo = new LinkedList<RGBDot>();
-        LinkedList<RGBDot> cieloNube = new LinkedList<RGBDot>();
-        LinkedList<RGBDot> nubes = new LinkedList<RGBDot>();
-        LinkedList<RGBDot> sol = new LinkedList<RGBDot>();
-
         LinkedList<LinkedList<RGBDot>> clustered = separateClouds(pixels);
 
         float icc = calculateIcc(clustered);
         System.out.println("Índice de cobertura nubosa: " + icc);
 
         if(generateImg) {
-            BufferedImage clustered_img = generateClusteredImg(clustered, img_width, img_height);
+            BufferedImage clustered_img = generateClusteredImg(clustered, img.getWidth(), img.getHeight());
             try {
                 File nuevoF = new File(outputName);
                 ImageIO.write(clustered_img, "jpg", nuevoF);
+                System.out.println("La imagen se guardó con nombre: " + outputName);
             }
             catch(IOException e) {
                 System.out.println(e);
@@ -159,13 +149,15 @@ public class App {
     }
 
     /**
-     * Método que separa una lista de RGBDot en dos listas a partir de un predicado
+     * Método que separa una lista de RGBDot en otra si cumple un predicado
      * @param dots Lista original
      * @param trueL Si el predicado es verdadero, aquí se meten los pixeles
-     * @param falseL Si el predicado es falso, aquí se meten los pixeles
-     * @return predicado El predicado a evaluar en la lista de puntos
+     * @param predicado El predicado a evaluar en la lista de puntos
+     * @return LinkedList<RGBDot> Si el predicado es false, se guarda en una
+     * lista y la devuelve
      */
-    public static void separateRGBDot(LinkedList<RGBDot> dots, LinkedList<RGBDot> trueL, LinkedList<RGBDot> falseL, Predicate<RGBDot> predicado) {
+    public static LinkedList<RGBDot> separateRGBDot(LinkedList<RGBDot> dots, LinkedList<RGBDot> trueL, Predicate<RGBDot> predicado) {
+        LinkedList<RGBDot> falseL = new LinkedList<RGBDot>();
         for (RGBDot dot: dots) {
             if (predicado.test(dot)) {
                 trueL.add(dot);
@@ -173,7 +165,9 @@ public class App {
                 falseL.add(dot);
             }
         }
+        return falseL;
     }
+
 
 
     /**
@@ -182,16 +176,15 @@ public class App {
      * @return LinkedList<LinkedList<RGBDot>> Lista con una lista de RGBDot,
      * el primero es la lista de pixeles con el cielo, el segundo con nubes
      */
-    public static LinkedList<LinkedList<RGBDot>> separateClouds(LinkedList<RGBDot> pixels) {
+    public static LinkedList<LinkedList<RGBDot>> separateClouds(LinkedList<RGBDot> cielo) {
         Predicate<RGBDot> separaSol = dot -> dot.get_r() + dot.get_b() + dot.get_g() == 255 *3;
-        Predicate<RGBDot> separaNubes = dot -> (float) dot.get_r()/dot.get_b() < 0.95;
-        LinkedList<RGBDot> cielo = new LinkedList<RGBDot>();
-        LinkedList<RGBDot> cieloNube = new LinkedList<RGBDot>();
+        Predicate<RGBDot> separaNubes = dot -> (float) dot.get_r()/dot.get_b() >= 0.95;
+
         LinkedList<RGBDot> nubes = new LinkedList<RGBDot>();
         LinkedList<RGBDot> sol = new LinkedList<RGBDot>();
 
-        separateRGBDot(pixels, sol, cieloNube, separaSol);
-        separateRGBDot(cieloNube, cielo, nubes, separaNubes);
+        cielo = separateRGBDot(cielo, sol, separaSol);
+        cielo = separateRGBDot(cielo, nubes, separaNubes);
         cielo.addAll(sol);
 
         LinkedList<LinkedList<RGBDot>> clustered = new LinkedList<LinkedList<RGBDot>>();
