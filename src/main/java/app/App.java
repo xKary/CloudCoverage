@@ -60,20 +60,8 @@ public class App {
                 }
             }
         }
-        Predicate<RGBDot> separaSol = dot -> dot.get_r() + dot.get_b() + dot.get_g() == 255 *3;
-        Predicate<RGBDot> separaNubes = dot -> (float) dot.get_r()/dot.get_b() < 0.95;
-        LinkedList<RGBDot> cielo = new LinkedList<RGBDot>();
-        LinkedList<RGBDot> cieloNube = new LinkedList<RGBDot>();
-        LinkedList<RGBDot> nubes = new LinkedList<RGBDot>();
-        LinkedList<RGBDot> sol = new LinkedList<RGBDot>();
 
-        separateRGBDot(pixels, sol, cieloNube, separaSol);
-        separateRGBDot(cieloNube, cielo, nubes, separaNubes);
-        cielo.addAll(sol);
-
-        LinkedList<LinkedList<RGBDot>> clustered = new LinkedList<LinkedList<RGBDot>>();
-        clustered.add(cielo);
-        clustered.add(nubes);
+        LinkedList<LinkedList<RGBDot>> clustered = separateClouds(pixels);
 
         float icc = calculateIcc(clustered);
         System.out.println("Índice de cobertura nubosa: " + icc);
@@ -90,6 +78,12 @@ public class App {
         }
     }
 
+    /**
+     * Método que abre una imagen a partir de un nombre
+     * @param name El nombre de la imagen a abrir
+     * @return BufferedImage imagen abierta
+     * @throws IOException
+     */
     public static BufferedImage readImage(String name) throws IOException {
         File f = new File(name);
         return ImageIO.read(f);
@@ -162,5 +156,30 @@ public class App {
                 falseL.add(dot);
             }
         }
+    }
+
+
+    /**
+     * Método que separa una lista de RGBDot en cielo y nubes
+     * @param pixels Lista original con nubes y cielo
+     * @return LinkedList<LinkedList<RGBDot>> Lista con una lista de RGBDot,
+     * el primero es la lista de pixeles con el cielo, el segundo con nubes
+     */
+    public static LinkedList<LinkedList<RGBDot>> separateClouds(LinkedList<RGBDot> pixels) {
+        Predicate<RGBDot> separaSol = dot -> dot.get_r() + dot.get_b() + dot.get_g() == 255 *3;
+        Predicate<RGBDot> separaNubes = dot -> (float) dot.get_r()/dot.get_b() < 0.95;
+        LinkedList<RGBDot> cielo = new LinkedList<RGBDot>();
+        LinkedList<RGBDot> cieloNube = new LinkedList<RGBDot>();
+        LinkedList<RGBDot> nubes = new LinkedList<RGBDot>();
+        LinkedList<RGBDot> sol = new LinkedList<RGBDot>();
+
+        separateRGBDot(pixels, sol, cieloNube, separaSol);
+        separateRGBDot(cieloNube, cielo, nubes, separaNubes);
+        cielo.addAll(sol);
+
+        LinkedList<LinkedList<RGBDot>> clustered = new LinkedList<LinkedList<RGBDot>>();
+        clustered.add(cielo);
+        clustered.add(nubes);
+        return clustered;
     }
 }
