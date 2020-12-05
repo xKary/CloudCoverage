@@ -51,17 +51,8 @@ public class App {
         float icc = calculateIcc(clustered);
         System.out.println("Índice de cobertura nubosa: " + icc);
 
-        if(generateImg) {
-            BufferedImage clustered_img = generateClusteredImg(clustered, img.getWidth(), img.getHeight());
-            try {
-                File nuevoF = new File(outputName);
-                ImageIO.write(clustered_img, "jpg", nuevoF);
-                System.out.println("La imagen se guardó con nombre: " + outputName);
-            }
-            catch(IOException e) {
-                System.out.println(e);
-            }
-        }
+        if(generateImg)
+            saveImage(clustered, img.getWidth(), img.getHeight());
     }
 
     /**
@@ -74,6 +65,7 @@ public class App {
         File f = new File(name);
         return ImageIO.read(f);
     }
+
     /**
      * Método que obtiene los pixeles de la imagen que están dentro de la máscara.
      * @param mask Imagén que se usa cómo máscara.
@@ -168,8 +160,6 @@ public class App {
         return falseL;
     }
 
-
-
     /**
      * Método que separa una lista de RGBDot en cielo y nubes
      * @param pixels Lista original con nubes y cielo
@@ -191,5 +181,23 @@ public class App {
         clustered.add(cielo);
         clustered.add(nubes);
         return clustered;
+    }
+
+    /**
+     * Método que guarda la imagen a blanco y negro.
+     * @param clustered Conjunto de datos a escribir en la imagen.
+     * @param img_Widht Ancho de la imagen.
+     * @param img_Height Alto de la imagen.
+     */
+    public static void saveImage(LinkedList<LinkedList<RGBDot>> clustered, int img_Widht, int img_Height){
+        BufferedImage clustered_img = generateClusteredImg(clustered, img_Widht, img_Height);
+        try {
+            File nuevoF = new File(outputName);
+            ImageIO.write(clustered_img, "jpg", nuevoF);
+            System.out.println("La imagen se guardó con nombre: " + outputName);
+        }
+        catch(IOException e) {
+            System.out.println(e);
+        }
     }
 }
