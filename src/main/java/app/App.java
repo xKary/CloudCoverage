@@ -8,8 +8,8 @@ import java.awt.Color;
 import javax.imageio.ImageIO;
 
 import java.util.LinkedList;
+import java.util.function.Predicate;
 
-import k_means.*;
 /**
  * Clase qué se encarga de determinar el Índice de Cobertura Nubosa de una
  * imagen del cielo, y generar su versión en blanco y negro si se lo
@@ -18,6 +18,7 @@ import k_means.*;
 public class App {
 
     public static String folder = "src/main/resources/";
+    public static String maskName = "mask.png";
     public static String inputName = folder;
     public static String outputName = folder;
     public static boolean generateImg = false;
@@ -25,6 +26,7 @@ public class App {
     public static void main(String args[])throws IOException {
 
         BufferedImage img = null;
+        BufferedImage mask = null;
 
         try {
             checkParameters(args);
@@ -34,57 +36,56 @@ public class App {
         }
 
         try {
-            File f = new File(inputName);
-            img = ImageIO.read(f);
+            img = readImage(inputName);
+            mask = readImage(folder + maskName);
         }
         catch(IOException e) {
             System.out.println("Ha ocurrido un error con el archivo.");
             System.out.println(e);
+            return;
         }
 
-        int img_width = img.getWidth();
-        int img_height = img.getHeight();
-
-        //cambiar el nombre de puntos
-        LinkedList<RGBDot> puntos = new LinkedList<RGBDot>();
-        for(int i = 0; i < img_width; i++) {
-            for(int j = 0; j < img_height; j++) {
-                double d = Math.sqrt(Math.pow(2184 - i,2) + Math.pow(1456 - j,2));
-                if(d <= 1324)
-                    puntos.add(new RGBDot(i,j, img.getRGB(i, j)));
-            }
-        }
-        LinkedList<RGBDot> cielo = new LinkedList<RGBDot>();
-        LinkedList<RGBDot> sol = new LinkedList<RGBDot>();
-        filterSun(puntos, cielo, sol);
-
-        LinkedList<RGBDot> init = new LinkedList<RGBDot>();
-
-        init.add(new RGBDot(0,0, 0, 0 , 255));
-        init.add(new RGBDot(0,0, 255, 0, 0));
-
-        KMeans<RGBDot> clusterer = new KMeans<RGBDot>(cielo);
-        LinkedList<LinkedList<RGBDot>> clustered = clusterer.getClusters(init, (RGBDot a,  RGBDot b) -> {
-            return (float) Math.abs(a.get_r() - b.get_r()*.95);
-        });
-
-        for (RGBDot dot: sol) {
-            clustered.get(0).add(dot);
-        }
+        LinkedList<RGBDot> pixels = readPixels(mask,img);
+        LinkedList<LinkedList<RGBDot>> clustered = separateClouds(pixels);
 
         float icc = calculateIcc(clustered);
         System.out.println("Índice de cobertura nubosa: " + icc);
 
-        if(generateImg) {
-            BufferedImage clustered_img = generateClusteredImg(clustered, img_width, img_height);
-            try {
-                File nuevoF = new File(outputName);
-                ImageIO.write(clustered_img, "jpg", nuevoF);
-            }
-            catch(IOException e) {
-                System.out.println(e);
+        if(generateImg)
+            saveImage(clustered, img.getWidth(), img.getHeight());
+    }
+
+    /**
+     * Método que abre una imagen a partir de un nombre
+     * @param name El nombre de la imagen a abrir
+     * @return BufferedImage imagen abierta
+     * @throws IOException
+     */
+    public static BufferedImage readImage(String name) throws IOException {
+        File f = new File(name);
+        return ImageIO.read(f);
+    }
+
+    /**
+     * Método que obtiene los pixeles de la imagen que están dentro de la máscara.
+     * @param mask Imagén que se usa cómo máscara.
+     * @param img Imagén de la cual se obtendrán los pixeles.
+     * @return LinkedList<RGBDot> Lista con los punto de la imagen que están dentro de la máscara.
+     */
+    public static LinkedList<RGBDot> readPixels(BufferedImage mask, BufferedImage img){
+        int blanco = 0xfff;
+        LinkedList<RGBDot> pixels = new LinkedList<RGBDot>();
+        for(int i = 0; i < mask.getWidth(); i++) {
+            for(int j = 0; j < mask.getHeight(); j++) {
+                int color = mask.getRGB(i, j);
+                if ((blanco & color) != 0) {
+                    int x = i + 834;
+                    int y = j + 106;
+                    pixels.add(new RGBDot(x,y, img.getRGB(x, y)));
+                }
             }
         }
+        return pixels;
     }
 
     /**
@@ -109,8 +110,8 @@ public class App {
      * @return float  Índice de cobertura nubosa.
      */
     public static float calculateIcc(LinkedList<LinkedList<RGBDot>> pixeles) {
-        int cloud_n = pixeles.get(0).size();
-        int sky_n = pixeles.get(1).size();
+        int sky_n = pixeles.get(0).size();
+        int cloud_n = pixeles.get(1).size();
         float icc = (float) cloud_n/(cloud_n + sky_n);
         return icc;
     }
@@ -139,13 +140,64 @@ public class App {
         return clustered_img;
     }
 
-    public static void filterSun(LinkedList<RGBDot> dots, LinkedList<RGBDot> sky, LinkedList<RGBDot> sun) {
+    /**
+     * Método que separa una lista de RGBDot en otra si cumple un predicado
+     * @param dots Lista original
+     * @param trueL Si el predicado es verdadero, aquí se meten los pixeles
+     * @param predicado El predicado a evaluar en la lista de puntos
+     * @return LinkedList<RGBDot> Si el predicado es false, se guarda en una
+     * lista y la devuelve
+     */
+    public static LinkedList<RGBDot> separateRGBDot(LinkedList<RGBDot> dots, LinkedList<RGBDot> trueL, Predicate<RGBDot> predicado) {
+        LinkedList<RGBDot> falseL = new LinkedList<RGBDot>();
         for (RGBDot dot: dots) {
-            if ((float) dot.get_r()/dot.get_b() < 0.95) {
-                sun.add(dot);
+            if (predicado.test(dot)) {
+                trueL.add(dot);
             } else {
-                sky.add(dot);
+                falseL.add(dot);
             }
+        }
+        return falseL;
+    }
+
+    /**
+     * Método que separa una lista de RGBDot en cielo y nubes
+     * @param pixels Lista original con nubes y cielo
+     * @return LinkedList<LinkedList<RGBDot>> Lista con una lista de RGBDot,
+     * el primero es la lista de pixeles con el cielo, el segundo con nubes
+     */
+    public static LinkedList<LinkedList<RGBDot>> separateClouds(LinkedList<RGBDot> cielo) {
+        Predicate<RGBDot> separaSol = dot -> dot.get_r() + dot.get_b() + dot.get_g() == 255 *3;
+        Predicate<RGBDot> separaNubes = dot -> (float) dot.get_r()/dot.get_b() >= 0.95;
+
+        LinkedList<RGBDot> nubes = new LinkedList<RGBDot>();
+        LinkedList<RGBDot> sol = new LinkedList<RGBDot>();
+
+        cielo = separateRGBDot(cielo, sol, separaSol);
+        cielo = separateRGBDot(cielo, nubes, separaNubes);
+        cielo.addAll(sol);
+
+        LinkedList<LinkedList<RGBDot>> clustered = new LinkedList<LinkedList<RGBDot>>();
+        clustered.add(cielo);
+        clustered.add(nubes);
+        return clustered;
+    }
+
+    /**
+     * Método que guarda la imagen a blanco y negro.
+     * @param clustered Conjunto de datos a escribir en la imagen.
+     * @param img_Widht Ancho de la imagen.
+     * @param img_Height Alto de la imagen.
+     */
+    public static void saveImage(LinkedList<LinkedList<RGBDot>> clustered, int img_Widht, int img_Height){
+        BufferedImage clustered_img = generateClusteredImg(clustered, img_Widht, img_Height);
+        try {
+            File nuevoF = new File(outputName);
+            ImageIO.write(clustered_img, "jpg", nuevoF);
+            System.out.println("La imagen se guardó con nombre: " + outputName);
+        }
+        catch(IOException e) {
+            System.out.println(e);
         }
     }
 }

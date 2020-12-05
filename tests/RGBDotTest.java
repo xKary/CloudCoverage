@@ -36,20 +36,7 @@ public class RGBDotTest{
         RGBDot dot = new RGBDot(10,20,0,100,90);
         assertEquals(25690,dot.to_rgb());
     }
-
-    @Test
-    public void testMean() {
-        LinkedList<RGBDot> list = new LinkedList<RGBDot>();
-        RGBDot dot = new RGBDot(10,20,0,100,90);
-        list.add(dot);
-        list.add(new RGBDot(105,15,125,150,190));
-        list.add(new RGBDot(100,200,231,200,140));
-        RGBDot meanAns = dot.mean(list);
-        assertEquals(118,meanAns.get_r());
-        assertEquals(150,meanAns.get_g());
-        assertEquals(140,meanAns.get_b());
-    }
-
+    
     @Test
     public void testEquals() {
         RGBDot dot = new RGBDot(10,20,0,100,90);

@@ -31,19 +31,15 @@
         $ java -cp build/ app.App 11833.jpg S
         $ java -cp build/ app.App 11833.jpg s
     ```  
- - El programa iniciará su ejecución y al finanlizar le indicará el índice de cobertura nubosa de la imagen y en caso de que haya generado la imagen en blanco y negro, esta se guardará en el la carpeta src/main/resources con el nombre de la imagen original con el sufijo "-seg" antes de la extensión.
- 
+ - El programa iniciará su ejecución y al finanlizar le indicará el índice de cobertura nubosa de la imagen. En caso de que haya generado la imagen en blanco y negro, ésta se guardará en el la carpeta src/main/resources con el nombre de la imagen original con el sufijo "-seg" antes de la extensión.
 ### Tests
-El programa cuenta con tests para las clases RGBDot y KMeans, para correrlo seguir laos siguientes pasos:
-  - Acceder a la carpeta tests, dentro de la carpeta CloudCoverage.
-     ```sh
-        $ cd tests
-      ```
+El programa cuenta con tests para la clase RGBDot, para correrlo seguir los siguientes pasos:
+Dentro de la carpeta CloudCoverage.
   - Compilar el test.
     ```sh
-        $ javac -cp lib/junit-4.13.1.jar:../src/main/java:. <nombreTest>.java
+        $ javac -cp tests/lib/junit-4.13.1.jar:src/main/java:. tests/RGBDotTest.java -d build
     ```
   - Correr el test.
     ```sh
-        $ java -cp lib/junit-4.13.1.jar:lib/hamcrest-core-1.3.jar:. org.junit.runner.JUnitCore <nombreTest>
+        $ java -cp tests/lib/junit-4.13.1.jar:tests/lib/hamcrest-core-1.3.jar:build:. org.junit.runner.JUnitCore RGBDotTest
     ```
