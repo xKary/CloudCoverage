@@ -34,15 +34,12 @@
  - El programa iniciará su ejecución y al finanlizar le indicará el índice de cobertura nubosa de la imagen y en caso de que haya generado la imagen en blanco y negro, esta se guardará en el la carpeta src/main/resources con el nombre de la imagen original con el sufijo "-seg" antes de la extensión.
 ### Tests
 El programa cuenta con tests para la clase RGBDot, para correrlo seguir los siguientes pasos:
-  - Acceder a la carpeta tests, dentro de la carpeta CloudCoverage.
-     ```sh
-        $ cd tests
-      ```
+Dentro de la carpeta CloudCoverage.
   - Compilar el test.
     ```sh
-        $ javac -cp lib/junit-4.13.1.jar:../src/main/java:. RGBDotTest.java
+        $ javac -cp tests/lib/junit-4.13.1.jar:src/main/java:. tests/RGBDotTest.java -d build
     ```
   - Correr el test.
     ```sh
-        $ java -cp lib/junit-4.13.1.jar:lib/hamcrest-core-1.3.jar:../build:. org.junit.runner.JUnitCore RGBDotTest
+        $ java -cp tests/lib/junit-4.13.1.jar:tests/lib/hamcrest-core-1.3.jar:build:. org.junit.runner.JUnitCore RGBDotTest
     ```
