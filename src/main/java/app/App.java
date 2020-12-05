@@ -18,6 +18,7 @@ import java.util.function.Predicate;
 public class App {
 
     public static String folder = "src/main/resources/";
+    public static String maskName = "mask.png";
     public static String inputName = folder;
     public static String outputName = folder;
     public static boolean generateImg = false;
@@ -25,6 +26,7 @@ public class App {
     public static void main(String args[])throws IOException {
 
         BufferedImage img = null;
+        BufferedImage mask = null;
 
         try {
             checkParameters(args);
@@ -34,24 +36,28 @@ public class App {
         }
 
         try {
-            File f = new File(inputName);
-            img = ImageIO.read(f);
+            img = readImage(inputName);
+            mask = readImage(folder + maskName);
         }
         catch(IOException e) {
             System.out.println("Ha ocurrido un error con el archivo.");
             System.out.println(e);
+            return;
         }
 
         int img_width = img.getWidth();
         int img_height = img.getHeight();
 
-        //cambiar el nombre de puntos
-        LinkedList<RGBDot> puntos = new LinkedList<RGBDot>();
-        for(int i = 0; i < img_width; i++) {
-            for(int j = 0; j < img_height; j++) {
-                double d = Math.sqrt(Math.pow(2184 - i,2) + Math.pow(1456 - j,2));
-                if(d <= 1324)
-                    puntos.add(new RGBDot(i,j, img.getRGB(i, j)));
+        int blanco = 0xfff;
+        LinkedList<RGBDot> pixels = new LinkedList<RGBDot>();
+        for(int i = 0; i < mask.getWidth(); i++) {
+            for(int j = 0; j < mask.getHeight(); j++) {
+                int color = mask.getRGB(i, j);
+                if ((blanco & color) != 0) {
+                    int x = i + 834;
+                    int y = j + 106;
+                    pixels.add(new RGBDot(x,y, img.getRGB(x, y)));
+                }
             }
         }
         Predicate<RGBDot> separaSol = dot -> dot.get_r() + dot.get_b() + dot.get_g() == 255 *3;
@@ -61,7 +67,7 @@ public class App {
         LinkedList<RGBDot> nubes = new LinkedList<RGBDot>();
         LinkedList<RGBDot> sol = new LinkedList<RGBDot>();
 
-        separateRGBDot(puntos, sol, cieloNube, separaSol);
+        separateRGBDot(pixels, sol, cieloNube, separaSol);
         separateRGBDot(cieloNube, cielo, nubes, separaNubes);
         cielo.addAll(sol);
 
@@ -82,6 +88,11 @@ public class App {
                 System.out.println(e);
             }
         }
+    }
+
+    public static BufferedImage readImage(String name) throws IOException {
+        File f = new File(name);
+        return ImageIO.read(f);
     }
 
     /**
@@ -136,6 +147,13 @@ public class App {
         return clustered_img;
     }
 
+    /**
+     * Método que separa una lista de RGBDot en dos listas a partir de un predicado
+     * @param dots Lista original
+     * @param trueL Si el predicado es verdadero, aquí se meten los pixeles
+     * @param falseL Si el predicado es falso, aquí se meten los pixeles
+     * @return predicado El predicado a evaluar en la lista de puntos
+     */
     public static void separateRGBDot(LinkedList<RGBDot> dots, LinkedList<RGBDot> trueL, LinkedList<RGBDot> falseL, Predicate<RGBDot> predicado) {
         for (RGBDot dot: dots) {
             if (predicado.test(dot)) {
